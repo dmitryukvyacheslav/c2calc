@@ -3,34 +3,34 @@
 // макс. вершин
 #define VTX_MAX 16
 
-void check_cc(int vertices, int adj_m[VTX_MAX][VTX_MAX]){
-    int cnt = 0;
-    int visited[VTX_MAX] = {0};
-    
-
-    for (int i = 0; i < vertices; i++) {
-        if (visited[i]) continue;
-        struct stack* adj_to_sel = stack_create(VTX_MAX);
-        stack_push(adj_to_sel, i);
-        
-        printw("(");
-        while (stack_size(adj_to_sel)) {
-            int vtx = stack_pop(adj_to_sel);
-            if (!visited[vtx]) {
-                printw("%d,", vtx+1);
-                visited[vtx]++;
-                for (int j = 0; j < vertices; j++) {
-                    if (visited[j]) continue;
-                    if (adj_m[i][j]) stack_push(adj_to_sel, j);
-                }
+void print_bfs(int adj_m[VTX_MAX][VTX_MAX], int vertices, int start, int visited[VTX_MAX])
+{
+    struct stack* stk = stack_create(VTX_MAX);
+    visited[start] = true;
+    stack_push(stk, start);
+    printw("(");
+    while (stack_size(stk)) {
+        int vtx = stack_pop(stk);
+        printw("%d,", vtx+1);
+        for (int adj = 0; adj < vertices; adj++) {
+            if (adj_m[vtx][adj] && !visited[adj]) {
+                visited[adj] = true;
+                stack_push(stk, adj);
             }
         }
-        stack_free(adj_to_sel);
-        int y, x;
-        getyx(stdscr, y, x);
-        move(y, x-1);
-        printw(") ");
-        cnt += 1;
+    }
+    int y, x;
+    getyx(stdscr,y, x);
+    move(y, x-1);
+    printw(")\n");
+    stack_free(stk);
+}
+
+void check_cc(int vertices, int adj_m[VTX_MAX][VTX_MAX]){
+    int visited[VTX_MAX] = {0};
+    for (int i = 0; i < vertices; i++) {
+        if (visited[i]) continue;
+        print_bfs(adj_m, vertices, i, visited);
     }
 }
 
@@ -68,9 +68,6 @@ int main(void) {
     int vertices = 2;
     // ui
     int xpos = 0, ypos = 0;
-
-    
-    
     initscr();
     start_color();
     noecho();
